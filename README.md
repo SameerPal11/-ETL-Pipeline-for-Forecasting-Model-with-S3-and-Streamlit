@@ -8,5 +8,8 @@
 
 
 ## Streamlit Visualised Data 
+
+![Screenshot 2025-02-27 222203](https://github.com/user-attachments/assets/1032bacc-bac5-4cc1-b5dd-6edc8ba84f75)
+![Screenshot 2025-02-27 221917](https://github.com/user-attachments/assets/fcccb11a-1e14-47d0-bb7d-4f0776b1f2ed)
 ![signal-2025-02-27-192149_003](https://github.com/user-attachments/assets/acc25fa3-92b4-4b9b-9c21-93c12453afaf)
 ![signal-2025-02-27-192149_002](https://github.com/user-attachments/assets/13cee2b5-d13c-4cc0-9b90-5f35c3574dbe)
