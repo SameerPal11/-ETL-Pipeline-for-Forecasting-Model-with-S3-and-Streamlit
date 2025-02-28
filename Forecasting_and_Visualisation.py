@@ -8,6 +8,7 @@ from sklearn.linear_model import LinearRegression
 BUCKET_NAME = "databucketforprocessing"
 PROCESSED_FILE_KEY = "processed_data/car_price_dataset.csv"
 FORECASTING_FILE_KEY = "processed_data/car_price_forecast.csv"
+LINEAR_REGRESSION_FILE_KEY = "processed_data/Forecast_using _linear_regg.csv"
 
 @st.cache_data
 def load_data(file_key):
@@ -20,9 +21,18 @@ def load_data(file_key):
         st.error(f"❌ Error loading data from S3: {e}")
         return pd.DataFrame()
 
+def save_data_to_s3(df, file_key):
+    try:
+        s3 = boto3.client("s3")
+        csv_buffer = io.StringIO()
+        df.to_csv(csv_buffer, index=False)
+        s3.put_object(Bucket=BUCKET_NAME, Key=file_key, Body=csv_buffer.getvalue())  
+        st.success(f"✅ Data successfully saved to S3: {file_key}")
+    except Exception as e:
+        st.error(f"❌ Error saving data to S3: {e}")
+
 st.title("🚗 Car Price Forecasting with Trend Analysis")
 
-# Load datasets
 df_original = load_data(PROCESSED_FILE_KEY)
 df_forecast = load_data(FORECASTING_FILE_KEY)
 
@@ -47,7 +57,7 @@ if not df_original.empty:
     if "price" in df_original.columns:
         df_original = df_original.reset_index()
 
-        X = np.array(df_original.index).reshape(-1, 1)
+        X = np.array(df_original.index).reshape(-1, 1)  
         y = df_original["price"].values.reshape(-1, 1)  
 
         model = LinearRegression()
@@ -57,18 +67,16 @@ if not df_original.empty:
 
         st.line_chart(df_original[["price", "trend"]])
 
+        save_data_to_s3(df_original[["index", "price", "trend"]], LINEAR_REGRESSION_FILE_KEY)
+
     else:
         st.warning("⚠️ 'price' column not found in dataset!")
 
 if not df_forecast.empty:
-    st.subheader("📉 Forecasting Data Preview")
-    st.dataframe(df_forecast.head())
-
     st.subheader("📈 Forecasted Price Trend")
     if "step" in df_forecast.columns and "forecasted_price" in df_forecast.columns:
-        st.line_chart(df_forecast.set_index("step")["forecasted_price"])
+        st.area_chart(df_forecast.set_index("step")["forecasted_price"])
     else:
         st.warning("⚠️ Columns 'step' and 'forecasted_price' not found in forecast dataset!")
-
 else:
     st.error("❌ No forecast data available for visualization!")
